@@ -43,6 +43,14 @@ class AdminService {
     };
     return axios.put(`${BASIC_URL}api/admin/task/${taskId}`, task, { headers });
   }
+
+  searchTasks(title) {
+    const token = localStorage.getItem('token');
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    return axios.get(`${BASIC_URL}api/admin/tasks/search/${title}`, { headers });
+  }
 }
 
 export default AdminService;

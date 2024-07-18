@@ -10,7 +10,7 @@ const Admin = () => {
     dueDate: '',
     priority: 'LOW',
     employeeId: '',
-    taskStatus: 'PENDING'  // Default status, can be adjusted as needed
+    taskStatus: 'PENDING'
   });
 
   const [tasks, setTasks] = useState([]);
@@ -18,6 +18,8 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editTaskId, setEditTaskId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);  // New state to track search mode
 
   useEffect(() => {
     fetchTasks();
@@ -68,7 +70,7 @@ const Admin = () => {
         alert('Task created successfully');
       }
       setTask({ title: '', description: '', dueDate: '', priority: 'LOW', employeeId: '', taskStatus: 'PENDING' });
-      fetchTasks();  // Refresh the list of tasks
+      fetchTasks();
     } catch (error) {
       console.error('Error creating/updating task:', error);
       alert('Failed to create/update task');
@@ -80,7 +82,7 @@ const Admin = () => {
     try {
       await adminService.deleteTask(taskId);
       alert('Task deleted successfully');
-      fetchTasks();  // Refresh the list of tasks
+      fetchTasks();
     } catch (error) {
       console.error('Error deleting task:', error);
       alert('Failed to delete task');
@@ -88,17 +90,39 @@ const Admin = () => {
   };
 
   const handleEdit = (task) => {
-    const formattedDueDate = task.dueDate.split('T')[0]; // Format the due date to "yyyy-MM-dd"
+    const formattedDueDate = task.dueDate.split('T')[0];
     setTask({
       title: task.title,
       description: task.description,
       dueDate: formattedDueDate,
       priority: task.priority,
       employeeId: task.employeeId,
-      taskStatus: task.taskStatus // Preserve the current task status
+      taskStatus: task.taskStatus
     });
     setIsEditing(true);
     setEditTaskId(task.id);
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    const adminService = new AdminService();
+    try {
+      const response = await adminService.searchTasks(searchTerm);
+      setTasks(response.data);
+      setIsSearching(true);  // Set search mode
+    } catch (error) {
+      console.error('Error searching tasks:', error);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleShowAllTasks = () => {
+    setSearchTerm('');
+    fetchTasks();
+    setIsSearching(false);  // Reset search mode
   };
 
   return (
@@ -136,8 +160,34 @@ const Admin = () => {
             ))}
           </select>
         </div>
+        <div>
+          <label>Status:</label>
+          <select name="taskStatus" value={task.taskStatus} onChange={handleChange}>
+            <option value="PENDING">Pending</option>
+            <option value="INPROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="DEFERRED">Deferred</option>
+          </select>
+        </div>
         <button type="submit">{isEditing ? 'Update Task' : 'Create Task'}</button>
       </form>
+
+      <div>
+        <h2>Search Tasks</h2>
+        <form onSubmit={handleSearch}>
+          <input
+            type="text"
+            placeholder="Search by title"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <button type="submit">Search</button>
+        </form>
+        {isSearching && (
+          <button onClick={handleShowAllTasks}>Show All Tasks</button>
+        )}
+      </div>
+
       <TaskList tasks={tasks} onDelete={handleDelete} onEdit={handleEdit} loading={loading} />
     </div>
   );

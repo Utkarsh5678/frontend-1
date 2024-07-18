@@ -6,6 +6,10 @@ const TaskList = ({ tasks, onDelete, onEdit, loading }) => {
     return <div>Loading...</div>;
   }
 
+  if (tasks.length === 0) {
+    return <div>No tasks found.</div>;
+  }
+
   return (
     <div>
       <h2>Task List</h2>
