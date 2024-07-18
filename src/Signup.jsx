@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const Signup = () => {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,6 +26,10 @@ const Signup = () => {
         <div>
             <form onSubmit={handleSubmit}>
                 <h2>Signup</h2>
+                <div>
+                    <label>Name:</label>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                </div>
                 <div>
                     <label>Email:</label>
                     <input type="email" name="email" value={formData.email} onChange={handleChange} required />
